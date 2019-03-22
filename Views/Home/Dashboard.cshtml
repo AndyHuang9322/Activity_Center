@@ -1,0 +1,76 @@
+<h2>Dojo Activity Center</h2> 
+<p>Wecome @ViewBag.FirstName!<p>
+
+<a href="New"><button type="button" class="btn btn-primary">New Activity</button></a>
+<a href="Logout"><button type="button" class="btn btn-danger">Logout</button></a>
+
+@using Activity_Center.Models
+@model List<Event>
+
+<table class="table table-striped mt-4">
+    <thead>
+      <tr>
+        <th scope="col">Activity</th>
+        <th scope="col">Date and Time</th>
+        <th scope="col">Duration</th>
+        <th scope="col">Event Coordinator</th>
+        <th scope="col"># of Participants</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+      <tbody>
+        @foreach(var E in @Model)
+        {
+        <tr>
+            <td scope="row">
+                <a href="/Activity/@E.EventId">@E.Title</a> 
+            </td>
+            <td>
+                @E.StartTime.ToString("MM/dd/yyyy @ hh:mm tt")
+            </td>
+            <td>
+                @E.Duration @E.TimeType
+            </td>
+            <td>
+               @foreach(var user in @ViewBag.users){
+                   if(@user.UserId == @E.UserId){
+                       @user.FirstName<span> </span> @user.LastName
+                   }
+               }
+            </td>
+            <td>
+                @E.Participants.Count
+            </td>
+            <td>
+                <form asp-action="RSVP" asp-route-id="@E.EventId" asp-controller="Home" method="post">
+                @if(@E.Participants.Count == 0)
+                {
+                    <button type="submit" class="btn-sm btn-success">Join</button>
+                }
+                else
+                {
+                    bool flag = false;
+                    @foreach (var guest in @E.Participants) {
+                        @if (@guest.UserId == @ViewBag.LoginUser) {
+                            flag = true;
+                        }
+                    }
+                    if(flag == true)
+                    {
+                        <a href="Un-RSVP/@E.EventId"><button type="button" class="btn-sm btn-secondary">Leave</button></a>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn-sm btn-success">Join</button>
+                    }
+                }
+                @if(@E.UserId == @ViewBag.LoginUser)
+                    {
+                        <a href="/delete/@E.EventId"><button type="button" class="btn-sm btn-danger">Delete</button></a>
+                    }
+                </form>
+            </td>
+        </tr>
+        }
+      </tbody>
+  </table>
